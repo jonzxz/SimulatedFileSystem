@@ -31,7 +31,9 @@ def init_mode():
     cfm_pwd = "12345678!aB"
     print(check_pwd(pwd, cfm_pwd))
 
-# Checks for password equality and invokes complexity check
+# Checks for password equality and password complexity requirements
+# More than 8 characters, contains upper and lower case alphabets
+# numbers and special characters
 def check_pwd(pwd, cfm_pwd):
     try:
         if pwd == cfm_pwd and len(pwd) >= 8:
@@ -63,14 +65,6 @@ def check_pwd(pwd, cfm_pwd):
             return False
     except ValueError as ve:
         print(ve)
-
-# Checks for password complexity requirements
-# More than 8 characters, contains upper and lower case alphabets
-# numbers and special characters
-def check_pwd_complexity(pwd):
-    if len(pwd) < 8:
-        return False
-
 
 
 main()
