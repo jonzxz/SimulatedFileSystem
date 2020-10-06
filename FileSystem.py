@@ -27,8 +27,8 @@ def init_mode():
     # Entered password values will not be shown
 #    pwd = getpass()
 #    cfm_pwd = getpass("Confirm Password: ")
-    pwd = "12345678!!aB"
-    cfm_pwd = "12345678!!aB"
+    pwd = "12345678!aB"
+    cfm_pwd = "12345678!aB"
     (check_pwd(pwd, cfm_pwd))
 
 def check_pwd(pwd, cfm_pwd):
@@ -50,7 +50,8 @@ def check_pwd_complexity(pwd):
         if char == " ":
             print("No spaces allowed in password, sorry!")
             return False
-        if not char.isalpha() and not char.isdigit():
+        if not(char.isalpha() or char.isdigit()):
+            # Detects double number of spec_char, no idea why
             contains_spec = True
         if char.isupper():
             contains_big_alpha = True
