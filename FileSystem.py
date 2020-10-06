@@ -4,7 +4,9 @@
 
 import argparse
 import re
+import sys
 from getpass import getpass
+
 
 
 def is_init_mode():
@@ -44,7 +46,6 @@ def check_pwd(pwd, cfm_pwd):
             for char in pwd:
                 if char == " ":
                     raise ValueError("No spaces allowed in password, sorry!")
-                    return False
                 if not(char.isalpha() or char.isdigit()):
                     contains_spec = True
                 if char.isupper():
@@ -57,14 +58,13 @@ def check_pwd(pwd, cfm_pwd):
             # print("contains_small ", contains_small_alpha)
             # print("contains_big ", contains_big_alpha)
             # print("contains_num ", contains_num)
-
             return (contains_spec and contains_big_alpha and contains_small_alpha and contains_num)
         else:
             raise ValueError("Password must be equal, contain at least 8 characters,"
             " 1 upper and lower-cased character, 1 number and 1 special symbol")
-            return False
     except ValueError as ve:
         print(ve)
+        sys.exit()
 
 
 main()
