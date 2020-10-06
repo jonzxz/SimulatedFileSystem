@@ -33,7 +33,7 @@ def init_mode():
 
 def check_pwd(pwd, cfm_pwd):
     if pwd == cfm_pwd and check_pwd_complexity(pwd):
-        print(check_pwd_complexity(pwd))
+        print("hurrah")
     else:
         return False
 
@@ -51,7 +51,6 @@ def check_pwd_complexity(pwd):
             print("No spaces allowed in password, sorry!")
             return False
         if not(char.isalpha() or char.isdigit()):
-            # Detects double number of spec_char, no idea why
             contains_spec = True
         if char.isupper():
             contains_big_alpha = True
