@@ -6,6 +6,7 @@ from argparse import ArgumentParser
 from sys import exit
 from random import randint
 from getpass import getpass
+from hashlib import md5
 
 
 
@@ -30,6 +31,12 @@ def init_mode():
 #    pwd = getpass()
 #    cfm_pwd = getpass("Confirm Password: ")
     username = "jon"
+
+    # insert user existence check here
+    if check_existing_user(username):
+        print("User {} already exist. Please choose another username".format(username))
+        exit()
+
     pwd = "12345678!aB"
     cfm_pwd = "12345678!aB"
     if check_pwd(pwd, cfm_pwd):
@@ -42,13 +49,63 @@ def init_mode():
                 else: raise ValueError("Invalid value, please enter only values from 0 to 3")
             except ValueError as ve:
                 print(ve)
-        print("Username: {}\nPassword: {}\nClearance: {}".format(username, pwd, user_clearance))
+
+        # Generate salt and write username:salt to salt.txt
         salt = make_salt()
-        print("{}:{}".format(username, salt))
+        #write_to_salt("{}:{}\n".format(username, salt))
+
+        # Generate MD5 hash of pwd|salt and write username:hash:usr_clr to shadow.txt
+        hashed_pwd_salt = make_md5_hash("{}{}".format(pwd, salt))
+        #write_to_shadow("{}:{}:{}".format(username, hashed_pwd_salt, user_clearance))
+        print("Account {} successfully created, please restart program to login".format(username))
+
+# Function to display info when existing user is found
+# parameter data[2] = [username, salt] from check_existing user
+# def display_existing_user_details(data):
+#     print("User {} found in salt.txt".format(data[0]))
+#     print("Salt retrieved {}".format(data[1]))
+#
+#     with open('shadow.txt', 'r') as shadow_file:
+#         credentials = [line.strip() for line in shadow_file.readlines()]
+#     print(credentials)
+#     for credential in credentials:
+#         if data[0] == credential.split(sep=":")[0]:
+#             print(data[0])
 
 
+# Function to test if entered username is present
+# return [user, salt] if present otherwise return None
+def check_existing_user(username):
+    with open('salt.txt', 'r') as salt_file:
+        users = [line.strip() for line in salt_file.readlines()]
+    try:
+        return ([user.split(sep=":") for user in users
+        if username == (user.split(sep=":")[0])][0])
+    except IndexError:
+        return None
+
+# Returns MD5 hash of encoded parameter
+def make_md5_hash(data):
+    md5_instance = md5()
+    md5_instance.update(data.encode())
+    return md5_instance.hexdigest()
+
+# Function to write to salt.txt
+def write_to_salt(data):
+    with open ('salt.txt', 'a') as salt_file:
+        salt_file.write(data)
+    salt_file.close()
+
+# Function to write to shadow.txt
+def write_to_shadow(data):
+    with open ('shadow.txt', 'a') as shadow_file:
+        shadow_file.write(data)
+    shadow_file.close()
+
+# Function to create a 8 digit long number
 def make_salt():
     return ''.join(["{}".format(randint(0, 9)) for num in range (0, 8)])
+
 # Checks for password equality and password complexity requirements
 # More than 8 characters, contains upper and lower case alphabets
 # numbers and special characters
@@ -80,7 +137,7 @@ def check_pwd(pwd, cfm_pwd):
             " 1 upper and lower-cased character, 1 number and 1 special symbol")
     except ValueError as ve:
         print(ve)
-        sys.exit()
+        exit()
 
 
 main()
