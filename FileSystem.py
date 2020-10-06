@@ -31,8 +31,15 @@ def init_mode():
 #    cfm_pwd = getpass("Confirm Password: ")
     pwd = "12345678!aB"
     cfm_pwd = "12345678!aB"
-    print(check_pwd(pwd, cfm_pwd))
-
+    if check_pwd(pwd, cfm_pwd):
+        is_clearance_valid = False
+        while not is_clearance_valid:
+            user_clearance = input("User clearance(0 - 3): ")
+            try:
+                if int(user_clearance) <= 3: is_clearance_valid = True
+                else: raise ValueError("Invalid value, please enter only values from 0 to 3")
+            except ValueError as ve:
+                print(ve)
 # Checks for password equality and password complexity requirements
 # More than 8 characters, contains upper and lower case alphabets
 # numbers and special characters
