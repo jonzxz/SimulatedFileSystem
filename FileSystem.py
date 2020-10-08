@@ -17,10 +17,12 @@ def main():
         # returns User / False. if false then the failure will be caught in login
         user_logged_in = login()
         if user_logged_in:
-            user_choice = menu_select()
             # pass in user name and user choice
-            process_user_choice(user_logged_in.get_user_name(),
-            user_logged_in.get_clearance(), user_choice)
+            user_choice = None
+            while not user_choice == 'E':
+                user_choice = menu_select()
+                process_user_choice(user_logged_in.get_user_name(),
+                user_logged_in.get_clearance(), user_choice)
 
 
 # Authorisation / Authorised entity features
@@ -75,7 +77,8 @@ def process_user_choice(username, user_clearance, user_choice):
         file_name = input("Please enter file name to be created: ")
         if file_name in [file.get_file_name() for file in files_present]:
             print("File exist already")
-        pass
+        else:
+            print("YATA")
     elif user_choice == 'A':
         pass
     elif user_choice == 'R':
