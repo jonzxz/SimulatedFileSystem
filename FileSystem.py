@@ -13,7 +13,7 @@ def main():
     if is_init_mode():
         init_mode()
     else:
-        # returns user name / False. if false then the failure will be caught in login
+        # returns User / False. if false then the failure will be caught in login
         user_logged_in = login()
         if user_logged_in:
             print(user_logged_in)
@@ -36,7 +36,7 @@ def menu_select():
         else:
             print("Invalid selection, please enter again!\n")
 
-# Returns username/false based on authentication result
+# Returns User / None based on authentication result
 def login():
     #entered_usrname = input("Username: ")
     #entered_password = getpass()
@@ -62,12 +62,13 @@ def login():
     # if shadow's md5(pwd|salt) == md5(entered_pwd|salt)
     if user_shadow_data[1] == make_md5_hash("{}{}"
     .format(entered_password, user_salt_data[1])):
-        print("\nAuthentication for user {0} complete.\nClearance for {0} is {1}"
-        .format(user_shadow_data[0], user_shadow_data[2]))
-        return User(user_shadow_data[0], user_shadow_data[1]
+        logged_in_user = User(user_shadow_data[0], user_shadow_data[1]
         , user_salt_data[1], user_shadow_data[2])
+        print("\nAuthentication for user {0} complete.\nClearance for {0} is {1}"
+        .format(logged_in_user.get_user_name(), logged_in_user.get_clearance()))
+        return logged_in_user
     print("Authentication failed")
-    return False
+    return None
 
 def read_shadow_for_user(username):
     with open('shadow.txt', 'r') as shadow_file:

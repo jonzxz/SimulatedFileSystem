@@ -24,7 +24,8 @@ class User:
         return self.__clearance
 
     def __str__(self):
-        return ("Username is {}".format(self.__user_name))
+        return ("\nUsername: {}\nHash: {}\nClearance: {}\n"
+        .format(self.__user_name, self.__password_hash, self.__clearance))
 
     def shadow_details(self):
         return "{}:{}:{}".format(self.__user_name, self.__password_hash, self.__clearance)
