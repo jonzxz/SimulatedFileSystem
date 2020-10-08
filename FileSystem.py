@@ -22,46 +22,8 @@ def main():
             process_user_choice(user_logged_in.get_user_name(),
             user_logged_in.get_clearance(), user_choice)
 
-def process_user_choice(username, user_clearance, user_choice):
-    files_present = get_files_in_store()
-    if user_choice == 'C':
-        file_name = input("Please enter file name to be created: ")
-        if file_name in [file.get_file_name() for file in files_present]:
-            print("File exist already")
-        pass
-    elif user_choice == 'A':
-        pass
-    elif user_choice == 'R':
-        pass
-    elif user_choice == 'W':
-        pass
-    elif user_choice == 'L':
-        pass
-    elif user_choice == 'S':
-        pass
-    elif user_choice == 'E':
-        pass
 
-def get_files_in_store():
-    file_list = []
-    with open ('files.store') as file_store:
-        data = [file.strip() for file in file_store.readlines()]
-    for file in data:
-        file_details = file.split(sep=":")
-        file_list.append(File(file_details[0], file_details[1], file_details[2]))
-    return file_list
-
-def menu_select():
-    is_choice_valid = False
-    valid_choices = ['C', 'A', 'R', 'W', 'L', 'S', 'E']
-    while not is_choice_valid:
-        print("\n(C)reate, (A)ppend, (R)ead, (W)rite, (L)ist, (S)ave, (E)xit: " , end="")
-        choice = input().upper()
-        if choice in valid_choices:
-            return choice
-        else:
-            print("Invalid selection, please enter again!\n")
-
+# Authorisation / Authorised entity features
 # Returns User / None based on authentication result
 def login():
     #entered_usrname = input("Username: ")
@@ -96,52 +58,56 @@ def login():
     print("Authentication failed")
     return None
 
+def menu_select():
+    is_choice_valid = False
+    valid_choices = ['C', 'A', 'R', 'W', 'L', 'S', 'E']
+    while not is_choice_valid:
+        print("\n(C)reate, (A)ppend, (R)ead, (W)rite, (L)ist, (S)ave, (E)xit: " , end="")
+        choice = input().upper()
+        if choice in valid_choices:
+            return choice
+        else:
+            print("Invalid selection, please enter again!\n")
+
+def process_user_choice(username, user_clearance, user_choice):
+    files_present = get_files_in_store()
+    if user_choice == 'C':
+        file_name = input("Please enter file name to be created: ")
+        if file_name in [file.get_file_name() for file in files_present]:
+            print("File exist already")
+        pass
+    elif user_choice == 'A':
+        pass
+    elif user_choice == 'R':
+        pass
+    elif user_choice == 'W':
+        pass
+    elif user_choice == 'L':
+        pass
+    elif user_choice == 'S':
+        pass
+    elif user_choice == 'E':
+        pass
+
+# Function to return list of File
+# Creates File objects on runtime
+def get_files_in_store():
+    file_list = []
+    with open ('files.store') as file_store:
+        data = [file.strip() for file in file_store.readlines()]
+    for file in data:
+        file_details = file.split(sep=":")
+        file_list.append(File(file_details[0], file_details[1], file_details[2]))
+    return file_list
+
+# Function to return [usrname, hash, clearance] from shadow if username
+# exist in shadow
 def read_shadow_for_user(username):
     with open('shadow.txt', 'r') as shadow_file:
         credentials = [line.strip() for line in shadow_file.readlines()]
     for credential in credentials:
         if username == credential.split(sep=":")[0]:
             return credential.split(sep=":")
-
-def init_mode():
-    print("User Creation",
-    "\n==============")
-    # Entered password values will not be shown
-    username = input("Username: ")
-    pwd = getpass()
-    cfm_pwd = getpass("Confirm Password: ")
-   #username = "jon"
-
-    # insert user existence check here
-    if check_existing_user(username):
-        print("User {} already exist. Please choose another username".format(username))
-        exit()
-
-    #pwd = "12345678!aB"
-    #cfm_pwd = "12345678!aB"
-    if check_pwd(pwd, cfm_pwd):
-        is_clearance_valid = False
-        while not is_clearance_valid:
-            user_clearance = input("User clearance(0 - 3): ")
-            #user_clearance = 3
-            try:
-                if int(user_clearance) <= 3: is_clearance_valid = True
-                else: raise ValueError("Invalid value, please enter only values from 0 to 3")
-            except ValueError as ve:
-                print(ve)
-
-        # Generate salt and write username:salt to salt.txt
-        salt = make_salt()
-        hashed_pwd_salt = make_md5_hash("{}{}".format(pwd, salt))
-
-        # Creates a User instance
-        user_created = User(username, hashed_pwd_salt, salt, user_clearance)
-        write_to_salt(user_created.salt_details())
-
-        # Generate MD5 hash of pwd|salt and write username:hash:usr_clr to shadow.txt
-        write_to_shadow(user_created.shadow_details() + "\n")
-        print("Account {} successfully created, please restart program to login"
-        .format(user_created.get_user_name()))
 
 # Function to display info when existing user is found
 # parameter data[2] = [username, salt] from check_existing user
@@ -183,6 +149,47 @@ def make_md5_hash(data):
 
 
 ## User Creation
+
+def init_mode():
+    print("User Creation",
+    "\n==============")
+    # Entered password values will not be shown
+    username = input("Username: ")
+    pwd = getpass()
+    cfm_pwd = getpass("Confirm Password: ")
+   #username = "jon"
+
+    # insert user existence check here
+    if check_existing_user(username):
+        print("User {} already exist. Please choose another username".format(username))
+        exit()
+
+    #pwd = "12345678!aB"
+    #cfm_pwd = "12345678!aB"
+    if check_pwd(pwd, cfm_pwd):
+        is_clearance_valid = False
+        while not is_clearance_valid:
+            user_clearance = input("User clearance(0 - 3): ")
+            #user_clearance = 3
+            try:
+                if int(user_clearance) <= 3: is_clearance_valid = True
+                else: raise ValueError("Invalid value, please enter only values from 0 to 3")
+            except ValueError as ve:
+                print(ve)
+
+        # Generate salt and write username:salt to salt.txt
+        salt = make_salt()
+        hashed_pwd_salt = make_md5_hash("{}{}".format(pwd, salt))
+
+        # Creates a User instance
+        user_created = User(username, hashed_pwd_salt, salt, user_clearance)
+        write_to_salt(user_created.salt_details())
+
+        # Generate MD5 hash of pwd|salt and write username:hash:usr_clr to shadow.txt
+        write_to_shadow(user_created.shadow_details() + "\n")
+        print("Account {} successfully created, please restart program to login"
+        .format(user_created.get_user_name()))
+
 
 # Function to write to salt.txt
 def write_to_salt(data):
