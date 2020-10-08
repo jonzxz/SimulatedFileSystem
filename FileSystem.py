@@ -7,20 +7,23 @@ from sys import exit
 from random import randint
 from getpass import getpass
 from hashlib import md5
-
-def is_init_mode():
-    parser = ArgumentParser("FileSystem")
-    parser.add_argument("-i", dest='init', action='store_true')
-    args = parser.parse_args()
-    return args.init
+from User import User
 
 def main():
     if is_init_mode():
         init_mode()
     else:
-        if login():
-            user_choice = menu_select()
-            process_user_choice(user_choice)
+        # returns user name / False. if false then the failure will be caught in login
+        user_logged_in = login()
+        if user_logged_in:
+            print(user_logged_in)
+            #user_choice = menu_select()
+            # pass in user name and user choice
+            #process_user_choice(login_result, user_choice)
+
+def process_user_choice(username, user_choice):
+    pass
+
 
 def menu_select():
     is_choice_valid = False
@@ -33,7 +36,7 @@ def menu_select():
         else:
             print("Invalid selection, please enter again!\n")
 
-# Returns true/false based on authentication result
+# Returns username/false based on authentication result
 def login():
     #entered_usrname = input("Username: ")
     #entered_password = getpass()
@@ -61,7 +64,8 @@ def login():
     .format(entered_password, user_salt_data[1])):
         print("\nAuthentication for user {0} complete.\nClearance for {0} is {1}"
         .format(user_shadow_data[0], user_shadow_data[2]))
-        return True
+        return User(user_shadow_data[0], user_shadow_data[1]
+        , user_salt_data[1], user_shadow_data[2])
     print("Authentication failed")
     return False
 
@@ -91,8 +95,8 @@ def init_mode():
     if check_pwd(pwd, cfm_pwd):
         is_clearance_valid = False
         while not is_clearance_valid:
-            #user_clearance = input("User clearance(0 - 3): ")
-            user_clearance = 3
+            user_clearance = input("User clearance(0 - 3): ")
+            #user_clearance = 3
             try:
                 if int(user_clearance) <= 3: is_clearance_valid = True
                 else: raise ValueError("Invalid value, please enter only values from 0 to 3")
@@ -101,12 +105,16 @@ def init_mode():
 
         # Generate salt and write username:salt to salt.txt
         salt = make_salt()
-        write_to_salt("{}:{}\n".format(username, salt))
+        hashed_pwd_salt = make_md5_hash("{}{}".format(pwd, salt))
+
+        # Creates a User instance
+        user_created = User(username, hashed_pwd_salt, salt, user_clearance)
+        write_to_salt(user_created.salt_details())
 
         # Generate MD5 hash of pwd|salt and write username:hash:usr_clr to shadow.txt
-        hashed_pwd_salt = make_md5_hash("{}{}".format(pwd, salt))
-        write_to_shadow("{}:{}:{}".format(username, hashed_pwd_salt, user_clearance))
-        print("Account {} successfully created, please restart program to login".format(username))
+        write_to_shadow(user_created.shadow_details() + "\n")
+        print("Account {} successfully created, please restart program to login"
+        .format(user_created.get_user_name()))
 
 # Function to display info when existing user is found
 # parameter data[2] = [username, salt] from check_existing user
@@ -123,8 +131,11 @@ def get_user_details(usrname):
         exit()
 
 ## Utilities
-
-
+def is_init_mode():
+    parser = ArgumentParser("FileSystem")
+    parser.add_argument("-i", dest='init', action='store_true')
+    args = parser.parse_args()
+    return args.init
 
 # Function to test if entered username is present
 # return [user, salt] if present otherwise return None
