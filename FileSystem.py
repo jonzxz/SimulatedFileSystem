@@ -18,12 +18,27 @@ def main():
     if is_init_mode():
         init_mode()
     else:
-        login()
+        if login():
+            user_choice = menu_select()
+            process_user_choice(user_choice)
+
+def menu_select():
+    is_choice_valid = False
+    valid_choices = ['C', 'A', 'R', 'W', 'L', 'S', 'E']
+    while not is_choice_valid:
+        print("\n(C)reate, (A)ppend, (R)ead, (W)rite, (L)ist, (S)ave, (E)xit: " , end="")
+        choice = input().upper()
+        if choice in valid_choices:
+            return choice
+        else:
+            print("Invalid selection, please enter again!\n")
 
 # Returns true/false based on authentication result
 def login():
-    entered_usrname = input("Username: ")
-    entered_password = getpass()
+    #entered_usrname = input("Username: ")
+    #entered_password = getpass()
+    entered_usrname = "jon"
+    entered_password = "12345678!aB"
 
     # Returns [0] = username
     #         [1] = salt from salt.txt
