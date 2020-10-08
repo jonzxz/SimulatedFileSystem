@@ -75,7 +75,7 @@ def process_user_choice(username, user_clearance, user_choice):
     files_present = get_files_in_store()
     if user_choice == 'C':
         file_name = input("Please enter file name to be created: ")
-        if file_name in [file.get_file_name() for file in files_present]:
+        if is_file_exist(file_name, files_present):
             print("File exist already")
         else:
             print("YATA")
@@ -91,6 +91,10 @@ def process_user_choice(username, user_clearance, user_choice):
         pass
     elif user_choice == 'E':
         pass
+
+# Function to test for presence of file in file list by name
+def is_file_exist(file_entered, filelist):
+    return file_entered in [file.get_file_name() for file in filelist]
 
 # Function to return list of File
 # Creates File objects on runtime
