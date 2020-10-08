@@ -25,8 +25,9 @@ def main():
 def process_user_choice(username, user_clearance, user_choice):
     files_present = get_files_in_store()
     if user_choice == 'C':
-        print([file.get_file_name() for file in files_present])
-        #file_name = input("Please enter file name to be created: ")
+        file_name = input("Please enter file name to be created: ")
+        if file_name in [file.get_file_name() for file in files_present]:
+            print("File exist already")
         pass
     elif user_choice == 'A':
         pass
@@ -49,10 +50,6 @@ def get_files_in_store():
         file_details = file.split(sep=":")
         file_list.append(File(file_details[0], file_details[1], file_details[2]))
     return file_list
-    # with open ('files.store') as file_store:
-    #     file_list = [line.split(sep=":")[0] for line in (line.strip() for line in file_store.readlines())]
-    # return file_list
-
 
 def menu_select():
     is_choice_valid = False
