@@ -8,6 +8,7 @@ from random import randint
 from getpass import getpass
 from hashlib import md5
 from User import User
+from File import File
 
 def main():
     if is_init_mode():
@@ -16,13 +17,41 @@ def main():
         # returns User / False. if false then the failure will be caught in login
         user_logged_in = login()
         if user_logged_in:
-            print(user_logged_in)
-            #user_choice = menu_select()
+            user_choice = menu_select()
             # pass in user name and user choice
-            #process_user_choice(login_result, user_choice)
+            process_user_choice(user_logged_in.get_user_name(),
+            user_logged_in.get_clearance(), user_choice)
 
-def process_user_choice(username, user_choice):
-    pass
+def process_user_choice(username, user_clearance, user_choice):
+    files_present = get_files_in_store()
+    if user_choice == 'C':
+        print([file.get_file_name() for file in files_present])
+        #file_name = input("Please enter file name to be created: ")
+        pass
+    elif user_choice == 'A':
+        pass
+    elif user_choice == 'R':
+        pass
+    elif user_choice == 'W':
+        pass
+    elif user_choice == 'L':
+        pass
+    elif user_choice == 'S':
+        pass
+    elif user_choice == 'E':
+        pass
+
+def get_files_in_store():
+    file_list = []
+    with open ('files.store') as file_store:
+        data = [file.strip() for file in file_store.readlines()]
+    for file in data:
+        file_details = file.split(sep=":")
+        file_list.append(File(file_details[0], file_details[1], file_details[2]))
+    return file_list
+    # with open ('files.store') as file_store:
+    #     file_list = [line.split(sep=":")[0] for line in (line.strip() for line in file_store.readlines())]
+    # return file_list
 
 
 def menu_select():
