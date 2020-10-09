@@ -10,6 +10,7 @@ from hashlib import md5
 from User import User
 from File import File
 from pathlib import Path
+import os
 
 def main():
     if is_init_mode():
@@ -84,7 +85,16 @@ def process_user_choice(username, user_clearance, user_choice):
             update_file_store(file_name, username, user_clearance)
 
     elif user_choice == 'A':
-        pass
+        file_name = input("Please enter file name to open and append: ")
+        if is_file_exist(file_name, files_present):
+            if check_user_permissions(file_name, user_clearance, files_present):
+                user_data_to_append = input("Enter data to append to file: ")
+                append_to_file(file_name, user_data_to_append)
+                print("Data appended to file {}".format(file_name))
+            else:
+                print("do not have permissions")
+        else:
+            print("File does not exist..")
     elif user_choice == 'R':
         pass
     elif user_choice == 'W':
@@ -96,6 +106,19 @@ def process_user_choice(username, user_clearance, user_choice):
     elif user_choice == 'E':
         pass
 
+# Adds a line break if file is not empty otherwise appended data starts on same line
+def append_to_file(file_name, data):
+    with open (file_name, 'a') as file:
+        if not os.stat(file_name).st_size == 0:
+            file.write("\n")
+        file.write(data)
+    file.close()
+
+def check_user_permissions(file_name, user_clearance, filelist):
+    for file in filelist:
+        if file.get_file_name() == file_name and file.get_clearance() <= user_clearance:
+            return True
+    return False
 
 def update_file_store(file_name, usrname, clearance):
     with open ('files.store', 'a') as file_store:
