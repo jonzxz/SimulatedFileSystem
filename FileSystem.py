@@ -10,6 +10,7 @@ from User import User
 from FileUtils import write_to_salt, write_to_shadow
 from UserUtils import login, process_user_choice, menu_select
 from UserUtils import check_pwd, check_existing_user, make_md5_hash
+from CustomExceptions import PasswordComplexityException, UserAlreadyExistException
 
 def main():
     if is_init_mode():
@@ -42,14 +43,13 @@ def init_mode():
     user_clearance = None
    #username = "jon"
 
-    # insert user existence check here
-    if check_existing_user(username):
-        print("User {} already exist. Please choose another username".format(username))
-        exit()
+    try:
+        # insert user existence check here
+        if check_existing_user(username):
+            raise UserAlreadyExistException("User already exist, please choose another username\n")
 
     #pwd = "12345678!aB"
     #cfm_pwd = "12345678!aB"
-    try:
         if check_pwd(pwd, cfm_pwd):
             is_clearance_valid = False
             while not is_clearance_valid:
@@ -57,9 +57,13 @@ def init_mode():
                 #user_clearance = 3
                 if int(user_clearance) <= 3: is_clearance_valid = True
                 else: print("Invalid value, please enter only values from 0 to 3")
-    except ValueError as ve:
-        print(ve)
-        exit()
+
+    except PasswordComplexityException as pce:
+        print(pce)
+        init_mode()
+    except UserAlreadyExistException as uaee:
+        print(uaee)
+        init_mode()
 
     # Generate salt and write username:salt to salt.txt
     salt = make_salt()

@@ -5,6 +5,9 @@ from hashlib import md5
 from User import User
 from FileUtils import get_files_in_store, is_file_exist, read_file_data
 from FileUtils import update_file_store_buffer, update_file_store_records, write_to_file
+from CustomExceptions import InsufficientPermissionsException, FileAlreadyExistException
+from CustomExceptions import FileNotInRecordException, AuthenticationFailureException
+from CustomExceptions import InvalidSelectionException, PasswordComplexityException
 
 def check_user_permissions(file_name, user_clearance, filelist):
     for file in filelist:
@@ -75,44 +78,49 @@ def check_pwd(pwd, cfm_pwd):
         and contains_small_alpha and contains_num):
             return True
         else:
-            raise ValueError("Password must be equal, contain at least 8 characters,"
-        " 1 upper and lower-cased character, 1 number and 1 special symbol")
+            raise PasswordComplexityException("Password is not equal, or does not meet " \
+            "complexity requirements.\nPassword must contain at least 8 characters, " \
+            "upper and lower case characters,\nnumbers and special characters.\n")
 
 
 # Authorisation / Authorised entity features
 # Returns User / None based on authentication result
 def login():
-    entered_usrname = input("Username: ")
-    entered_password = getpass()
-    # entered_usrname = "jon"
-    # entered_password = "12345678!aB"
+    try:
+        entered_usrname = input("Username: ")
+        entered_password = getpass()
+        # entered_usrname = "jon"
+        # entered_password = "12345678!aB"
 
-    # Returns [0] = username
-    #         [1] = salt from salt.txt
-    user_salt_data = get_user_details(entered_usrname)
-    # Returns [0] = username
-    #         [1] = hashed_pwd_salt
-    #         [2] = clearance
-    user_shadow_data = read_shadow_for_user(entered_usrname)
+        # Returns [0] = username
+        #         [1] = salt from salt.txt
+        user_salt_data = get_user_details(entered_usrname)
+        # Returns [0] = username
+        #         [1] = hashed_pwd_salt
+        #         [2] = clearance
+        user_shadow_data = read_shadow_for_user(entered_usrname)
 
-    #print("Entered user: {}\nretrieved user(salt): {}\nretrieved user(shadow): {}".format(entered_usrname, user_salt_data[0], user_shadow_data[0]))
-    #print("Entered password: {}".format(entered_password))
-    #print("Retrieved salt: {}".format(user_salt_data[1]))
-    #print("Retrieved hashed PW: {}".format(user_shadow_data[1]))
-    print("Hashing...")
-    print("Hash value: {}".format(make_md5_hash("{}{}"
-    .format(entered_password, user_salt_data[1]))))
+        #print("Entered user: {}\nretrieved user(salt): {}\nretrieved user(shadow): {}".format(entered_usrname, user_salt_data[0], user_shadow_data[0]))
+        #print("Entered password: {}".format(entered_password))
+        #print("Retrieved salt: {}".format(user_salt_data[1]))
+        #print("Retrieved hashed PW: {}".format(user_shadow_data[1]))
+        print("Hashing...")
+        print("Hash value: {}".format(make_md5_hash("{}{}"
+        .format(entered_password, user_salt_data[1]))))
 
-    # if shadow's md5(pwd|salt) == md5(entered_pwd|salt)
-    if user_shadow_data[1] == make_md5_hash("{}{}"
-    .format(entered_password, user_salt_data[1])):
-        logged_in_user = User(user_shadow_data[0], user_shadow_data[1]
-        , user_salt_data[1], user_shadow_data[2])
-        print("\nAuthentication for user {0} complete.\nClearance for {0} is {1}"
-        .format(logged_in_user.get_user_name(), logged_in_user.get_clearance()))
-        return logged_in_user
-    print("Authentication failed")
-    return None
+        # if shadow's md5(pwd|salt) == md5(entered_pwd|salt)
+        if user_shadow_data[1] == make_md5_hash("{}{}"
+        .format(entered_password, user_salt_data[1])):
+            logged_in_user = User(user_shadow_data[0], user_shadow_data[1]
+            , user_salt_data[1], user_shadow_data[2])
+            print("\nAuthentication for user {0} complete.\nClearance for {0} is {1}"
+            .format(logged_in_user.get_user_name(), logged_in_user.get_clearance()))
+            return logged_in_user
+        else:
+            raise AuthenticationFailureException("Wrong username/password\n")
+    except AuthenticationFailureException as afe:
+        print(afe)
+        login()
 
 def menu_select():
     is_choice_valid = False
@@ -127,71 +135,85 @@ def menu_select():
 
 def process_user_choice(username, user_clearance, user_choice):
     files_present = get_files_in_store()
-    if user_choice == 'C':
-        file_name = input("Please enter file name to be created (with extensions): ")
-        if is_file_exist(file_name, files_present):
-            print("File exist already, returning to menu...")
-        else:
-            Path(file_name).touch()
-            print("{} created, returning to menu...".format(file_name))
-            update_file_store_buffer(file_name, username, user_clearance)
+    try:
+        if user_choice == 'C':
+            file_name = input("Please enter file name to be created (with extensions): ")
+            if is_file_exist(file_name, files_present):
+                raise FileAlreadyExistException("File already exist, returning to main menu..")
+            else:
+                Path(file_name).touch()
+                print("{} created, returning to menu...".format(file_name))
+                update_file_store_buffer(file_name, username, user_clearance)
 
-    elif user_choice == 'A':
-        file_name = input("Please enter file name to open and append: ")
-        if is_file_exist(file_name, files_present):
-            if check_user_permissions(file_name, user_clearance, files_present):
-                user_data_to_append = input("Enter data to append to file: ")
-                write_to_file(file_name, user_data_to_append, 'a')
-                print("\nData appended to file {}, returning to menu..".format(file_name))
+        elif user_choice == 'A':
+            file_name = input("Please enter file name to open and append: ")
+            if is_file_exist(file_name, files_present):
+                if check_user_permissions(file_name, user_clearance, files_present):
+                    user_data_to_append = input("Enter data to append to file: ")
+                    write_to_file(file_name, user_data_to_append, 'a')
+                    print("\nData appended to file {}, returning to menu..".format(file_name))
+                else:
+                    raise InsufficientPermissionsException("Insufficient permissions!")
             else:
-                print("do not have permissions")
-        else:
-            print("File not found in records, if you have just created the file, save first")
-    elif user_choice == 'R':
-        file_name = input("please enter file name to read: ")
-        if is_file_exist(file_name, files_present):
-            if check_user_permissions(file_name, user_clearance, files_present):
-                print("Contents of file {}\n=============================="
-                .format(file_name))
-                print(read_file_data(file_name))
-                print("==============================\nEnd of file")
+                raise FileNotInRecordException("File not found in records\
+                , if you have just created the file, save first")
+        elif user_choice == 'R':
+            file_name = input("please enter file name to read: ")
+            if is_file_exist(file_name, files_present):
+                if check_user_permissions(file_name, user_clearance, files_present):
+                    print("Contents of file {}\n=============================="
+                    .format(file_name))
+                    print(read_file_data(file_name))
+                    print("==============================\nEnd of file")
+                else:
+                    raise InsufficientPermissionsException("Insufficient permissions!")
             else:
-                print("do not have permissions")
-        else:
-            print("File not found in records, if you have just created the file, save first")
-    elif user_choice == 'W':
-        file_name = input("Please enter file name to write: ")
-        if is_file_exist(file_name, files_present):
-            if check_user_permissions(file_name, user_clearance, files_present):
-                user_data_to_write = input("Enter data to write to file *ALL EXISTING DATA WILL BE LOST*: ")
-                write_to_file(file_name, user_data_to_write, 'w')
-                print("\nData written to file {}, returning to menu..".format(file_name))
+                raise FileNotInRecordException("File not found in records\
+                , if you have just created the file, save first")
+        elif user_choice == 'W':
+            file_name = input("Please enter file name to write: ")
+            if is_file_exist(file_name, files_present):
+                if check_user_permissions(file_name, user_clearance, files_present):
+                    user_data_to_write = input("Enter data to write to file *ALL EXISTING DATA WILL BE LOST*: ")
+                    write_to_file(file_name, user_data_to_write, 'w')
+                    print("\nData written to file {}, returning to menu..".format(file_name))
+                else:
+                    raise InsufficientPermissionsException("Insufficient permissions!")
             else:
-                print("Do not have permissions")
-        else:
-            print("File not found in records, if you have just created the file, save first")
-    elif user_choice == 'L':
-        print("Files recorded in store\n=======================")
-        if files_present:
-            print("{}".format("\n".join([file.get_file_name() for file in files_present])))
-        else:
-            print("No records found in store")
-    elif user_choice == 'S':
-        print("Saving all newly created files into record...")
-        update_file_store_records()
-    elif user_choice == 'E':
-        is_choice_valid = False
-        while not is_choice_valid:
-            print("\nPlease remember to save before you quit!")
-            shutdown = input("Shut down the file system? (Y)es or (N)o: ").upper()
-            if shutdown == 'Y':
-                print("Exiting now, newly created files not saved will not be recorded into the store!")
-                exit()
-            elif shutdown == 'N':
-                is_choice_valid = True
+                raise FileNotInRecordException("File not found in records\
+                , if you have just created the file, save first")
+        elif user_choice == 'L':
+            print("Files recorded in store\n=======================")
+            if files_present:
+                print("{}".format("\n".join([file.get_file_name() for file in files_present])))
             else:
-                print("Invalid selection")
+                print("Records are empty - no files stored in records")
+        elif user_choice == 'S':
+            print("Saving all newly created files into record...")
+            update_file_store_records()
+        elif user_choice == 'E':
+            is_choice_valid = False
+            while not is_choice_valid:
+                print("\nPlease remember to save before you quit!")
+                shutdown = input("Shut down the file system? (Y)es or (N)o: ").upper()
+                if shutdown == 'Y':
+                    print("Exiting now, newly created files not saved will not be recorded into the store!")
+                    exit()
+                elif shutdown == 'N':
+                    is_choice_valid = True
+                else:
+                    print("Invalid selection")
+    except FileAlreadyExistException as faee:
+        print(faee)
+        menu_select()
 
+    except InsufficientPermissionsException as ipe:
+        print(ipe)
+        menu_select()
+
+    except InvalidSelectionException as ise:
+        print(ise)
+        menu_select()
 
 # Returns MD5 hash of encoded parameter
 def make_md5_hash(data):
