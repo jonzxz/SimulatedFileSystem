@@ -1,3 +1,5 @@
+# Custom exception classes for the sake of clearer handling
+# instead of prints all over the place
 class InsufficientPermissionsException(Exception):
     pass
 

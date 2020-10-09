@@ -5,10 +5,12 @@ from hashlib import md5
 from User import User
 from FileUtils import get_files_in_store, is_file_exist, read_file_data
 from FileUtils import update_file_store_buffer, update_file_store_records, write_to_file
+from CustomExceptions import InvalidSelectionException, AuthenticationFailureException
+from CustomExceptions import PasswordComplexityException, FileNotInRecordException
 from CustomExceptions import InsufficientPermissionsException, FileAlreadyExistException
-from CustomExceptions import FileNotInRecordException, AuthenticationFailureException
-from CustomExceptions import InvalidSelectionException, PasswordComplexityException
 
+# Function returnint bool to check user permission level against file permission level
+# Based on passed in file name and list of files present
 def check_user_permissions(file_name, user_clearance, filelist):
     for file in filelist:
         if file.get_file_name() == file_name and file.get_clearance() <= user_clearance:
@@ -26,17 +28,18 @@ def read_shadow_for_user(username):
 
 # Function to display info when existing user is found
 # parameter data[2] = [username, salt] from check_existing user
+# If user does not exist then quit program
 def get_user_details(usrname):
     try:
         data = check_existing_user(usrname)
         if not data:
-            raise ValueError("\nUser does not exist")
-        print("User {} found in salt.txt".format(data[0]))
+            raise AuthenticationFailureException("User does not exist\n")
+        print("\nUser {} found in salt.txt".format(data[0]))
         print("Salt retrieved from salt.txt: {}".format(data[1]))
         return data
-    except ValueError as e:
-        print(e)
-        exit()
+    except AuthenticationFailureException as afe:
+        print(afe)
+        login()
 
 # Function to test if entered username is present
 # return [user, salt] if present otherwise return None
@@ -82,7 +85,6 @@ def check_pwd(pwd, cfm_pwd):
             "complexity requirements.\nPassword must contain at least 8 characters, " \
             "upper and lower case characters,\nnumbers and special characters.\n")
 
-
 # Authorisation / Authorised entity features
 # Returns User / None based on authentication result
 def login():
@@ -122,6 +124,7 @@ def login():
         print(afe)
         login()
 
+# Function to print and request for valid user input
 def menu_select():
     is_choice_valid = False
     valid_choices = ['C', 'A', 'R', 'W', 'L', 'S', 'E']
@@ -133,6 +136,7 @@ def menu_select():
     else:
         print("Invalid selection, please enter again!\n")
 
+# Main bulk of function switching based on input from menu_select()
 def process_user_choice(username, user_clearance, user_choice):
     files_present = get_files_in_store()
     try:
@@ -141,10 +145,10 @@ def process_user_choice(username, user_clearance, user_choice):
             if is_file_exist(file_name, files_present):
                 raise FileAlreadyExistException("File already exist, returning to main menu..")
             else:
+                # Creates an empty file if file does not exist
                 Path(file_name).touch()
                 print("{} created, returning to menu...".format(file_name))
                 update_file_store_buffer(file_name, username, user_clearance)
-
         elif user_choice == 'A':
             file_name = input("Please enter file name to open and append: ")
             if is_file_exist(file_name, files_present):
@@ -205,13 +209,10 @@ def process_user_choice(username, user_clearance, user_choice):
                     print("Invalid selection")
     except FileAlreadyExistException as faee:
         print(faee)
-
     except FileNotInRecordException as fnire:
         print(fnire)
-
     except InsufficientPermissionsException as ipe:
         print(ipe)
-
     except InvalidSelectionException as ise:
         print(ise)
 

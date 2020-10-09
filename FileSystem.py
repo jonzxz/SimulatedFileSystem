@@ -12,27 +12,30 @@ from UserUtils import login, process_user_choice, menu_select
 from UserUtils import check_pwd, check_existing_user, make_md5_hash
 from CustomExceptions import PasswordComplexityException, UserAlreadyExistException
 
+# Main entry point of program
 def main():
     if is_init_mode():
         init_mode()
     else:
-        # returns User / False. if false then the failure will be caught in login
+        # returns authenticated User. if false then the failure will be caught in login
         user_logged_in = login()
         if user_logged_in:
             # pass in user name and user choice
             while True:
+                # Enters into main menu loop and asks for user choices until exit
+                # parameters passed in to update / check filestore during CRU(D)
                 user_choice = menu_select()
                 process_user_choice(user_logged_in.get_user_name(),
                 user_logged_in.get_clearance(), user_choice)
 
-## Utilities
+# Argument parser function to check if -i flag was given in CLI execution
 def is_init_mode():
     parser = ArgumentParser("FileSystem")
     parser.add_argument("-i", dest='init', action='store_true')
     args = parser.parse_args()
     return args.init
 
-## User Creation
+## Function to call for user creation
 def init_mode():
     print("User Creation",
     "\n==============")
@@ -41,15 +44,15 @@ def init_mode():
     pwd = getpass()
     cfm_pwd = getpass("Confirm Password: ")
     user_clearance = None
-   #username = "jon"
+    #username = "jon"
+    #pwd = "12345678!aB"
+    #cfm_pwd = "12345678!aB"
 
     try:
-        # insert user existence check here
         if check_existing_user(username):
             raise UserAlreadyExistException("User already exist, please choose another username\n")
 
-    #pwd = "12345678!aB"
-    #cfm_pwd = "12345678!aB"
+        # Enters into loop for valid clearance level if password entered meets complexity requirements
         if check_pwd(pwd, cfm_pwd):
             is_clearance_valid = False
             while not is_clearance_valid:
@@ -58,6 +61,7 @@ def init_mode():
                 if int(user_clearance) <= 3: is_clearance_valid = True
                 else: print("Invalid value, please enter only values from 0 to 3")
 
+    # Exception handling to call init_mode() again if caught
     except PasswordComplexityException as pce:
         print(pce)
         init_mode()
@@ -81,6 +85,5 @@ def init_mode():
 # Function to create a 8 digit long number
 def make_salt():
     return ''.join(["{}".format(randint(0, 9)) for num in range (0, 8)])
-
 
 main()
