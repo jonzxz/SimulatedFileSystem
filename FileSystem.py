@@ -89,7 +89,7 @@ def process_user_choice(username, user_clearance, user_choice):
         if is_file_exist(file_name, files_present):
             if check_user_permissions(file_name, user_clearance, files_present):
                 user_data_to_append = input("Enter data to append to file: ")
-                append_to_file(file_name, user_data_to_append)
+                write_to_file(file_name, user_data_to_append, 'a')
                 print("\nData appended to file {}, returning to menu..".format(file_name))
             else:
                 print("do not have permissions")
@@ -108,7 +108,11 @@ def process_user_choice(username, user_clearance, user_choice):
         else:
             print("File does not exist..")
     elif user_choice == 'W':
-        pass
+        file_name = input("Please enter file name to write: ")
+        if is_file_exist(file_name, files_present):
+            if check_user_permissions(file_name, user_clearance, files_present):
+                user_data_to_write = input("Enter data to write to file *ALL EXISTING DATA WILL BE LOST*: ")
+                write_to_file(file_name, user_data_to_write, 'w')
     elif user_choice == 'L':
         pass
     elif user_choice == 'S':
@@ -121,8 +125,8 @@ def read_file_data(file_name):
         return file.read()
 
 # Adds a line break if file is not empty otherwise appended data starts on same line
-def append_to_file(file_name, data):
-    with open (file_name, 'a') as file:
+def write_to_file(file_name, data, mode):
+    with open (file_name, mode) as file:
         if not os.stat(file_name).st_size == 0:
             file.write("\n")
         file.write(data)
