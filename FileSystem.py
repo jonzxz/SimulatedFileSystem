@@ -9,6 +9,7 @@ from getpass import getpass
 from hashlib import md5
 from User import User
 from File import File
+from pathlib import Path
 
 def main():
     if is_init_mode():
@@ -74,11 +75,14 @@ def menu_select():
 def process_user_choice(username, user_clearance, user_choice):
     files_present = get_files_in_store()
     if user_choice == 'C':
-        file_name = input("Please enter file name to be created: ")
+        file_name = input("Please enter file name to be created (with extensions): ")
         if is_file_exist(file_name, files_present):
-            print("File exist already")
+            print("File exist already, returning to menu...")
         else:
-            print("YATA")
+            Path(file_name).touch()
+            print("{} created, returning to menu...".format(file_name))
+            update_file_store(file_name, username, user_clearance)
+
     elif user_choice == 'A':
         pass
     elif user_choice == 'R':
@@ -91,6 +95,11 @@ def process_user_choice(username, user_clearance, user_choice):
         pass
     elif user_choice == 'E':
         pass
+
+
+def update_file_store(file_name, usrname, clearance):
+    with open ('files.store', 'a') as file_store:
+        file_store.write("{}:{}:{}".format(file_name, usrname, clearance))
 
 # Function to test for presence of file in file list by name
 def is_file_exist(file_entered, filelist):
