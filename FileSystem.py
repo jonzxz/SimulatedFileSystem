@@ -126,8 +126,17 @@ def process_user_choice(username, user_clearance, user_choice):
         print("Saving all newly created files into record...")
         update_file_store_records()
     elif user_choice == 'E':
-        pass
-
+        is_choice_valid = False
+        while not is_choice_valid:
+            print("\nPlease remember to save before you quit!")
+            shutdown = input("Shut down the file system? (Y)es or (N)o: ").upper()
+            if shutdown == 'Y':
+                print("Exiting now, newly created files not saved will not be recorded into the store!")
+                exit()
+            elif shutdown == 'N':
+                is_choice_valid = True
+            else:
+                print("Invalid selection")
 def read_file_data(file_name):
     with open(file_name, 'r') as file:
         return file.read()
