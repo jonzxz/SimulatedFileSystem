@@ -20,8 +20,7 @@ def main():
         user_logged_in = login()
         if user_logged_in:
             # pass in user name and user choice
-            user_choice = None
-            while not user_choice == 'E':
+            while True:
                 user_choice = menu_select()
                 process_user_choice(user_logged_in.get_user_name(),
                 user_logged_in.get_clearance(), user_choice)
@@ -82,7 +81,7 @@ def process_user_choice(username, user_clearance, user_choice):
         else:
             Path(file_name).touch()
             print("{} created, returning to menu...".format(file_name))
-            update_file_store(file_name, username, user_clearance)
+            update_file_store_buffer(file_name, username, user_clearance)
 
     elif user_choice == 'A':
         file_name = input("Please enter file name to open and append: ")
@@ -94,7 +93,7 @@ def process_user_choice(username, user_clearance, user_choice):
             else:
                 print("do not have permissions")
         else:
-            print("File does not exist..")
+            print("File not found in records, if you have just created the file, save first")
     elif user_choice == 'R':
         file_name = input("please enter file name to read: ")
         if is_file_exist(file_name, files_present):
@@ -106,13 +105,17 @@ def process_user_choice(username, user_clearance, user_choice):
             else:
                 print("do not have permissions")
         else:
-            print("File does not exist..")
+            print("File not found in records, if you have just created the file, save first")
     elif user_choice == 'W':
         file_name = input("Please enter file name to write: ")
         if is_file_exist(file_name, files_present):
             if check_user_permissions(file_name, user_clearance, files_present):
                 user_data_to_write = input("Enter data to write to file *ALL EXISTING DATA WILL BE LOST*: ")
                 write_to_file(file_name, user_data_to_write, 'w')
+            else:
+                print("Do not have permissions")
+        else:
+            print("File not found in records, if you have just created the file, save first")
     elif user_choice == 'L':
         print("Files recorded in store\n=======================")
         if files_present:
@@ -120,7 +123,8 @@ def process_user_choice(username, user_clearance, user_choice):
         else:
             print("No records found in store")
     elif user_choice == 'S':
-        pass
+        print("Saving all newly created files into record...")
+        update_file_store_records()
     elif user_choice == 'E':
         pass
 
@@ -142,9 +146,19 @@ def check_user_permissions(file_name, user_clearance, filelist):
             return True
     return False
 
-def update_file_store(file_name, usrname, clearance):
-    with open ('files.store', 'a') as file_store:
-        file_store.write("{}:{}:{}".format(file_name, usrname, clearance))
+def update_file_store_records():
+    if os.path.exists('files.store.tmp'):
+        with open ('files.store.tmp', 'r') as fs_temp:
+            fs_temp_data = fs_temp.read()
+        fs_temp.close()
+        write_to_file('files.store', fs_temp_data, 'a')
+        os.remove('files.store.tmp')
+
+def update_file_store_buffer(file_name, usrname, clearance):
+    to_tmp_fs_buff = "{}:{}:{}".format(file_name, usrname, clearance)
+    write_to_file('files.store.tmp', to_tmp_fs_buff, 'a')
+    # with open ('files.store.tmp', 'a') as file_store:
+    #     file_store.write("{}:{}:{}".format(file_name, usrname, clearance))
 
 # Function to test for presence of file in file list by name
 def is_file_exist(file_entered, filelist):
@@ -154,11 +168,12 @@ def is_file_exist(file_entered, filelist):
 # Creates File objects on runtime
 def get_files_in_store():
     file_list = []
-    with open ('files.store') as file_store:
-        data = [file.strip() for file in file_store.readlines()]
-    for file in data:
-        file_details = file.split(sep=":")
-        file_list.append(File(file_details[0], file_details[1], file_details[2]))
+    if os.path.exists('files.store'):
+        with open ('files.store') as file_store:
+            data = [file.strip() for file in file_store.readlines()]
+        for file in data:
+            file_details = file.split(sep=":")
+            file_list.append(File(file_details[0], file_details[1], file_details[2]))
     return file_list
 
 # Function to return [usrname, hash, clearance] from shadow if username
