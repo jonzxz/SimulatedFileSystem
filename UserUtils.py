@@ -97,7 +97,7 @@ def login():
 
     #print("Entered user: {}\nretrieved user(salt): {}\nretrieved user(shadow): {}".format(entered_usrname, user_salt_data[0], user_shadow_data[0]))
     #print("Entered password: {}".format(entered_password))
-    print("Retrieved salt: {}".format(user_salt_data[1]))
+    #print("Retrieved salt: {}".format(user_salt_data[1]))
     #print("Retrieved hashed PW: {}".format(user_shadow_data[1]))
     print("Hashing...")
     print("Hash value: {}".format(make_md5_hash("{}{}"
