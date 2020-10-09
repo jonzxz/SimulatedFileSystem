@@ -114,7 +114,11 @@ def process_user_choice(username, user_clearance, user_choice):
                 user_data_to_write = input("Enter data to write to file *ALL EXISTING DATA WILL BE LOST*: ")
                 write_to_file(file_name, user_data_to_write, 'w')
     elif user_choice == 'L':
-        pass
+        print("Files recorded in store\n=======================")
+        if files_present:
+            print("{}".format("\n".join([file.get_file_name() for file in files_present])))
+        else:
+            print("No records found in store")
     elif user_choice == 'S':
         pass
     elif user_choice == 'E':
