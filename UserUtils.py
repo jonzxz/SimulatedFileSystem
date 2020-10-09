@@ -125,13 +125,13 @@ def login():
 def menu_select():
     is_choice_valid = False
     valid_choices = ['C', 'A', 'R', 'W', 'L', 'S', 'E']
-    while not is_choice_valid:
-        print("\n(C)reate, (A)ppend, (R)ead, (W)rite, (L)ist, (S)ave, (E)xit: " , end="")
-        choice = input().upper()
-        if choice in valid_choices:
-            return choice
-        else:
-            print("Invalid selection, please enter again!\n")
+
+    print("\n(C)reate, (A)ppend, (R)ead, (W)rite, (L)ist, (S)ave, (E)xit: " , end="")
+    choice = input().upper()
+    if choice in valid_choices:
+        return choice
+    else:
+        print("Invalid selection, please enter again!\n")
 
 def process_user_choice(username, user_clearance, user_choice):
     files_present = get_files_in_store()
@@ -155,8 +155,8 @@ def process_user_choice(username, user_clearance, user_choice):
                 else:
                     raise InsufficientPermissionsException("Insufficient permissions!")
             else:
-                raise FileNotInRecordException("File not found in records\
-                , if you have just created the file, save first")
+                raise FileNotInRecordException("File not found in records, "\
+                "if you have just created the file, save first")
         elif user_choice == 'R':
             file_name = input("please enter file name to read: ")
             if is_file_exist(file_name, files_present):
@@ -168,8 +168,8 @@ def process_user_choice(username, user_clearance, user_choice):
                 else:
                     raise InsufficientPermissionsException("Insufficient permissions!")
             else:
-                raise FileNotInRecordException("File not found in records\
-                , if you have just created the file, save first")
+                raise FileNotInRecordException("File not found in records, " \
+                "if you have just created the file, save first")
         elif user_choice == 'W':
             file_name = input("Please enter file name to write: ")
             if is_file_exist(file_name, files_present):
@@ -180,8 +180,8 @@ def process_user_choice(username, user_clearance, user_choice):
                 else:
                     raise InsufficientPermissionsException("Insufficient permissions!")
             else:
-                raise FileNotInRecordException("File not found in records\
-                , if you have just created the file, save first")
+                raise FileNotInRecordException("File not found in records, " \
+                "if you have just created the file, save first")
         elif user_choice == 'L':
             print("Files recorded in store\n=======================")
             if files_present:
@@ -205,15 +205,15 @@ def process_user_choice(username, user_clearance, user_choice):
                     print("Invalid selection")
     except FileAlreadyExistException as faee:
         print(faee)
-        menu_select()
+
+    except FileNotInRecordException as fnire:
+        print(fnire)
 
     except InsufficientPermissionsException as ipe:
         print(ipe)
-        menu_select()
 
     except InvalidSelectionException as ise:
         print(ise)
-        menu_select()
 
 # Returns MD5 hash of encoded parameter
 def make_md5_hash(data):

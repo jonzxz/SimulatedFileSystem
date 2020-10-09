@@ -37,6 +37,7 @@ def update_file_store_records():
         with open ('files.store.tmp', 'r') as fs_temp:
             fs_temp_data = fs_temp.read()
         fs_temp.close()
+        fs_temp_data = '\n'.join(list(set(fs_temp_data.split(sep="\n"))))
         write_to_file('files.store', fs_temp_data, 'a')
         os.remove('files.store.tmp')
 
