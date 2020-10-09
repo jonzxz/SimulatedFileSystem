@@ -90,13 +90,23 @@ def process_user_choice(username, user_clearance, user_choice):
             if check_user_permissions(file_name, user_clearance, files_present):
                 user_data_to_append = input("Enter data to append to file: ")
                 append_to_file(file_name, user_data_to_append)
-                print("Data appended to file {}".format(file_name))
+                print("\nData appended to file {}, returning to menu..".format(file_name))
             else:
                 print("do not have permissions")
         else:
             print("File does not exist..")
     elif user_choice == 'R':
-        pass
+        file_name = input("please enter file name to read: ")
+        if is_file_exist(file_name, files_present):
+            if check_user_permissions(file_name, user_clearance, files_present):
+                print("Contents of file {}\n=============================="
+                .format(file_name))
+                print(read_file_data(file_name))
+                print("==============================\nEnd of file")
+            else:
+                print("do not have permissions")
+        else:
+            print("File does not exist..")
     elif user_choice == 'W':
         pass
     elif user_choice == 'L':
@@ -105,6 +115,10 @@ def process_user_choice(username, user_clearance, user_choice):
         pass
     elif user_choice == 'E':
         pass
+
+def read_file_data(file_name):
+    with open(file_name, 'r') as file:
+        return file.read()
 
 # Adds a line break if file is not empty otherwise appended data starts on same line
 def append_to_file(file_name, data):
