@@ -14,9 +14,11 @@ from CustomExceptions import PasswordComplexityException, UserAlreadyExistExcept
 
 # Main entry point of program
 def main():
+    print("MD5: {}".format(make_md5_hash("This is a test")))
     if is_init_mode():
         init_mode()
     else:
+        print("\nLogin to access FileSystem\n==========================\n")
         # returns authenticated User. if false then the failure will be caught in login
         user_logged_in = login()
         if user_logged_in:

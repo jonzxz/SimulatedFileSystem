@@ -11,10 +11,22 @@ from CustomExceptions import InsufficientPermissionsException, FileAlreadyExistE
 
 # Function returnint bool to check user permission level against file permission level
 # Based on passed in file name and list of files present
-def check_user_permissions(file_name, user_clearance, filelist):
+#############################################
+# Based on Bell LaPadula model              #
+# Users can write UP but cannot read UP     #
+# Users can read DOWN but cannot write down #
+#############################################
+# These are the working assumptions that access control matrice specifies
+# that higher level users are ALLOWED to read down by default
+# and lower level users are ALLOWED to write up by default
+# Assignment does not specify a ACM with * properties
+def check_user_permissions(file_name, user_clearance, filelist, mode):
     for file in filelist:
-        if file.get_file_name() == file_name and file.get_clearance() <= user_clearance:
-            return True
+        if file.get_file_name() == file_name:
+            if mode == 'r' and file.get_clearance() <= user_clearance:
+                return True
+            if (mode == 'w' or mode == 'a') and file.get_clearance() >= user_clearance:
+                return True
     return False
 
 # Function to return [usrname, hash, clearance] from shadow if username
@@ -152,37 +164,40 @@ def process_user_choice(username, user_clearance, user_choice):
         elif user_choice == 'A':
             file_name = input("Please enter file name to open and append: ")
             if is_file_exist(file_name, files_present):
-                if check_user_permissions(file_name, user_clearance, files_present):
+                if check_user_permissions(file_name, user_clearance, files_present, 'a'):
                     user_data_to_append = input("Enter data to append to file: ")
                     write_to_file(file_name, user_data_to_append, 'a')
                     print("\nData appended to file {}, returning to menu..".format(file_name))
                 else:
-                    raise InsufficientPermissionsException("Insufficient permissions!")
+                    raise InsufficientPermissionsException("Your user level of {}" \
+                    " is not authorised to append to file {}".format(user_clearance, file_name))
             else:
                 raise FileNotInRecordException("File not found in records, "\
                 "if you have just created the file, save first")
         elif user_choice == 'R':
             file_name = input("please enter file name to read: ")
             if is_file_exist(file_name, files_present):
-                if check_user_permissions(file_name, user_clearance, files_present):
+                if check_user_permissions(file_name, user_clearance, files_present, 'r'):
                     print("Contents of file {}\n=============================="
                     .format(file_name))
                     print(read_file_data(file_name))
                     print("==============================\nEnd of file")
                 else:
-                    raise InsufficientPermissionsException("Insufficient permissions!")
+                    raise InsufficientPermissionsException("Your user level of {}" \
+                    " is not authorised to read file {}".format(user_clearance, file_name))
             else:
                 raise FileNotInRecordException("File not found in records, " \
                 "if you have just created the file, save first")
         elif user_choice == 'W':
             file_name = input("Please enter file name to write: ")
             if is_file_exist(file_name, files_present):
-                if check_user_permissions(file_name, user_clearance, files_present):
+                if check_user_permissions(file_name, user_clearance, files_present, 'w'):
                     user_data_to_write = input("Enter data to write to file *ALL EXISTING DATA WILL BE LOST*: ")
                     write_to_file(file_name, user_data_to_write, 'w')
                     print("\nData written to file {}, returning to menu..".format(file_name))
                 else:
-                    raise InsufficientPermissionsException("Insufficient permissions!")
+                    raise InsufficientPermissionsException("Your user level of {}" \
+                    " is not authorised to write to file {}".format(user_clearance, file_name))
             else:
                 raise FileNotInRecordException("File not found in records, " \
                 "if you have just created the file, save first")
