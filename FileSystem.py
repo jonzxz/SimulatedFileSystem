@@ -1,5 +1,5 @@
 # FileSystem for CSCI262 S4 2020
-# Developed and tested in 3.8.5, Windows 10 Pro Version 2004
+# Developed and tested in Python 3.8.5, Windows 10 Pro Version 2004
 # Written by Jon K, 2020
 
 from argparse import ArgumentParser
