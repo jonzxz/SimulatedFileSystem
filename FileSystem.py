@@ -66,9 +66,11 @@ def init_mode():
             while not is_clearance_valid:
                 user_clearance = input("User clearance(0 - 3): ")
                 #user_clearance = 3
-                if int(user_clearance) <= 3: is_clearance_valid = True
-                else: print("Invalid value, please enter only values from 0 to 3")
-
+                try:
+                    if int(user_clearance) <= 3: is_clearance_valid = True
+                    else: print("Invalid value, please enter only values from 0 to 3")
+                except ValueError as ve:
+                    print("Clearance must be an integer!\n")
                 # Generate salt and write username:salt to salt.txt
             salt = make_salt()
             hashed_pwd_salt = make_md5_hash("{}{}".format(pwd, salt))
