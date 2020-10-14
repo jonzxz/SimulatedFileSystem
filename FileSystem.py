@@ -42,8 +42,14 @@ def init_mode():
     print("User Creation",
     "\n==============")
     # Entered password values will not be shown
-    username = input("Username: ")
+    username = None
+    pwd = None
+    cfm_pwd = None
+    while username == None or username == "":
+        username = input("Username: ")
+
     pwd = getpass()
+
     cfm_pwd = getpass("Confirm Password: ")
     user_clearance = None
     #username = "jon"
@@ -63,6 +69,20 @@ def init_mode():
                 if int(user_clearance) <= 3: is_clearance_valid = True
                 else: print("Invalid value, please enter only values from 0 to 3")
 
+                # Generate salt and write username:salt to salt.txt
+            salt = make_salt()
+            hashed_pwd_salt = make_md5_hash("{}{}".format(pwd, salt))
+
+            # Creates a User instance
+            user_created = User(username, hashed_pwd_salt, salt, user_clearance)
+            write_to_salt(user_created.salt_details())
+
+            # Generate MD5 hash of pwd|salt and write username:hash:usr_clr to shadow.txt
+            write_to_shadow(user_created.shadow_details())
+            print("Account {} successfully created, please restart program to login"
+            .format(user_created.get_user_name()))
+
+
     # Exception handling to call init_mode() again if caught
     except PasswordComplexityException as pce:
         print(pce)
@@ -71,18 +91,6 @@ def init_mode():
         print(uaee)
         init_mode()
 
-    # Generate salt and write username:salt to salt.txt
-    salt = make_salt()
-    hashed_pwd_salt = make_md5_hash("{}{}".format(pwd, salt))
-
-    # Creates a User instance
-    user_created = User(username, hashed_pwd_salt, salt, user_clearance)
-    write_to_salt(user_created.salt_details())
-
-    # Generate MD5 hash of pwd|salt and write username:hash:usr_clr to shadow.txt
-    write_to_shadow(user_created.shadow_details())
-    print("Account {} successfully created, please restart program to login"
-    .format(user_created.get_user_name()))
 
 # Function to create a 8 digit long number
 def make_salt():

@@ -93,9 +93,12 @@ def check_pwd(pwd, cfm_pwd):
         and contains_small_alpha and contains_num):
             return True
         else:
-            raise PasswordComplexityException("Password is not equal, or does not meet " \
+            raise PasswordComplexityException("Password does not meet " \
             "complexity requirements.\nPassword must contain at least 8 characters, " \
             "upper and lower case characters,\nnumbers and special characters.\n")
+    else:
+        raise PasswordComplexityException("Password is not equal or " \
+        "does not meet length requirement\n")
 
 # Authorisation / Authorised entity features
 # Returns User / None based on authentication result
