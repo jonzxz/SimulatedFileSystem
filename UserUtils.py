@@ -25,7 +25,9 @@ def check_user_permissions(file_name, user_clearance, filelist, mode):
         if file.get_file_name() == file_name:
             if mode == 'r' and file.get_clearance() <= user_clearance:
                 return True
-            if (mode == 'w' or mode == 'a') and file.get_clearance() >= user_clearance:
+            if mode == 'a' and file.get_clearance() >= user_clearance:
+                return True
+            if mode == 'w' and file.get_clearance() == user_clearance:
                 return True
     return False
 
