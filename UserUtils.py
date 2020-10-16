@@ -139,7 +139,7 @@ def login():
             raise AuthenticationFailureException("Wrong username/password\n")
     except AuthenticationFailureException as afe:
         print(afe)
-        login()
+        return None
 
 # Function to print and request for valid user input
 def menu_select():
