@@ -9,7 +9,7 @@
     - User creation are stored in salt.txt and shadow.txt to imitate salt and shadow in UNIX
         - `salt.txt` contains `username:random_salt`
         - `shadow.txt` contains `username:md5(password|salt):access_level`
-- 4 Stages of access level from `0 to 4` for users
+- 4 Stages of access level from `0 to 3` for users
     - Higher value indicates higher authority
     - Access permissions are based off BLP
 - Allows users to create, write, update and list files
